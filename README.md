@@ -8,10 +8,11 @@ Library used to encode data into a byte array to be sent via LoRaWan.
 2. Include the header file at the top op the `.ino` file. `include "UREncoder.h"`.
 
 ### PlatformIO
-1. Create a folder named `UREncoder` in the `lib` folder of a PlatformIO project or
-2. Place `UREncoder.ccp` & `UREncoder.h` into the folder named `UREncoder`.
-3. Include it into main.cpp or other files via `include <UREncoder.h>`.
-
+1. In `platformio.ini` place the link to the repository. When this repo is updated the updates will automatically be
+installed by PlatformIO
+```
+lib_deps = https://github.com/Urban-Reef/Sensor-Reef-UREncoder.git
+```
 ## Usage
 Instantiate a `UREncoder` object. Pass the size of the buffer in bytes and the `id` of the Reef. 
 ```c++
@@ -97,3 +98,6 @@ uint8_t UREncoder::addNewType(uint16_t value) {
 ### Converting types
 Only integers (whole numbers) can be stored in the buffer. To store `float`, `double` or `decimal`
 they have to be converted to whole numbers. For examples look at `addTemperature()` and `addHumidity()` methods.
+
+### Publishing changes
+In `library.json` update the `version`. Commit and push changes, create a new release with the same version number as stated in `library.json`.
