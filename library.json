@@ -1,0 +1,23 @@
+{
+  "name": "UREncoder",
+  "version": "1.0.0",
+  "description": "Library used to encode data into a byte array to be sent via LoRaWan.",
+  "keywords": "LoRaWan, Urban Reef, encoder, buffer, byte array",
+  "repository":
+  {
+    "type": "git",
+    "url": "https://github.com/Urban-Reef/Sensor-Reef-UREncoder.git"
+  },
+  "authors":
+  [
+    {
+      "name": "Daan Meijs",
+      "email": "danielmeijs@gmail.com",
+      "url": "https://cheftags.nl",
+      "maintainer": true
+    }
+  ],
+  "license": "MIT",
+  "frameworks": "*",
+  "platforms": "*"
+}
