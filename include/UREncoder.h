@@ -1,43 +1,48 @@
-#ifndef UR_ENCODER
-#define UR_ENCODER
+#ifndef UR_ENCODER_H
+#define UR_ENCODER_H
 
 #include <cstdint>
-#include <cstdlib>
 #include <cstring>
 
-//Type flags used during decoding to identify what data is being read.
+#define MAX_BUFFER_SIZE 200
+
+// Type flags
 #define REEF                1
 #define POINT               2
-#define TEMPERATURE         3
-#define RELATIVE_HUMIDITY   4
-#define LUMINOSITY          5
+#define SUBPOINT            3
+#define TEMPERATURE         4
+#define RELATIVE_HUMIDITY   5
+#define SOIL_MOISTURE       6
 
-//total byte size of flag and value.
+// Sizes
 #define REEF_SIZE               2
 #define POINT_SIZE              2
+#define SUBPOINT_SIZE           2
 #define TEMPERATURE_SIZE        3
-#define RELATIVE_HUMIDITY_SIZE  3
-#define LUMINOSITY_SIZE         3
+#define RELATIVE_HUMIDITY_SIZE  2
+#define SOIL_MOISTURE_SIZE      3
 
 class UREncoder {
 public:
     explicit UREncoder(uint8_t size, uint8_t reefId);
-    ~UREncoder();
+    void resetCursor();
+    void reset();
+    uint8_t getSize();
+    uint8_t* getBuffer();
 
-    void resetCursor(void);
-    uint8_t getSize(void);
-    uint8_t* getBuffer(void);
-
-    uint8_t addPoint(uint8_t position);
-    uint8_t addTemperature(float celsius);
-    uint8_t addRelativeHumidity(float rh);
-    uint8_t addLuminosity(uint16_t lux);
+    bool addPoint(uint8_t position);
+    bool addSubpoint(uint8_t subposition);
+    bool addTemperature(float celsius);
+    bool addRelativeHumidity(float rh);
+    bool addSoilMoisture(uint16_t value);
 
 private:
-    uint8_t *buffer;
+    uint8_t buffer[MAX_BUFFER_SIZE] = {0};
     uint8_t maxsize;
     uint8_t cursor;
-    uint8_t addReefId(uint8_t id);
+    uint8_t reefId;
+
+    bool addReefId(uint8_t id);
 };
 
-#endif //UR_ENCODER
+#endif // UR_ENCODER_H

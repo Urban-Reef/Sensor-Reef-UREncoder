@@ -4,95 +4,71 @@
 
 #include "../include/UREncoder.h"
 
-//Pass the size of byte array and reef id.
-UREncoder::UREncoder(uint8_t size, uint8_t reefId) : maxsize(size) {
-    //creates a buffer of a specific size.
-    buffer = (uint8_t*) malloc(size);
+UREncoder::UREncoder(uint8_t size, uint8_t reefId) : maxsize(size), reefId(reefId), cursor(0) {
+    memset(buffer, 0, MAX_BUFFER_SIZE);
+    addReefId(reefId);
+}
+
+void UREncoder::resetCursor() {
+    cursor = 0;
+}
+
+void UREncoder::reset() {
+    memset(buffer, 0, maxsize);
     cursor = 0;
     addReefId(reefId);
 }
 
-UREncoder::~UREncoder() {
-    free(buffer);
-}
-
-//resets cursor to 0 position. Does not clear buffer.
-void UREncoder::resetCursor(void) {
-    cursor = 0;
-}
-
-//returns the cursor position.
-uint8_t UREncoder::getSize(void) {
+uint8_t UREncoder::getSize() {
     return cursor;
 }
 
-//returns the buffer.
-uint8_t *UREncoder::getBuffer(void) {
+uint8_t* UREncoder::getBuffer() {
     return buffer;
 }
 
-uint8_t UREncoder::addReefId(uint8_t id) {
-    if ((cursor + REEF_SIZE) > maxsize) {
-        return 0;
-    }
-
+bool UREncoder::addReefId(uint8_t id) {
+    if ((cursor + REEF_SIZE) > maxsize) return false;
     buffer[cursor++] = REEF;
     buffer[cursor++] = id;
-
-    return cursor;
+    return true;
 }
 
-uint8_t UREncoder::addPoint(uint8_t position) {
-    if ((cursor + POINT_SIZE) > maxsize) {
-        return 0;
-    }
-
+bool UREncoder::addPoint(uint8_t position) {
+    if ((cursor + POINT_SIZE) > maxsize) return false;
     buffer[cursor++] = POINT;
     buffer[cursor++] = position;
-
-    return cursor;
+    return true;
 }
 
-uint8_t UREncoder::addTemperature(float celsius) {
-    if ((cursor + TEMPERATURE_SIZE) > maxsize) {
-        return 0;
-    }
-    //multiply by ten to move the decimal up to convert float to a 16bit signed integer.
-    //Ex: 18.6 * 10 = 186
-    int16_t val = celsius * 10;
+bool UREncoder::addSubpoint(uint8_t subposition) {
+    if ((cursor + SUBPOINT_SIZE) > maxsize) return false;
+    buffer[cursor++] = SUBPOINT;
+    buffer[cursor++] = subposition;
+    return true;
+}
+
+bool UREncoder::addTemperature(float celsius) {
+    if ((cursor + TEMPERATURE_SIZE) > maxsize) return false;
+    int16_t val = static_cast<int16_t>(celsius * 10);
     buffer[cursor++] = TEMPERATURE;
-    //Split the 16bit unsigned int into 2 unsigned 8 bit int.
-    //Store the two bits in Big Endian order.
     buffer[cursor++] = val >> 8;
-    buffer[cursor++] = val;
-
-    return cursor;
+    buffer[cursor++] = val & 0xFF;
+    return true;
 }
 
-uint8_t UREncoder::addRelativeHumidity(float rh) {
-    if ((cursor + RELATIVE_HUMIDITY_SIZE) > maxsize) {
-        return 0;
-    }
-
-    //Humidity is measured in steps of 0.5 and has a range of 0 - 100
-    //This allows us to store it in a single 8-bit unsigned int by multiplying by 2 as this removes the decimal.
-    //Ex: 25.5 * 2 = 50
+bool UREncoder::addRelativeHumidity(float rh) {
+    if ((cursor + RELATIVE_HUMIDITY_SIZE) > maxsize) return false;
+    uint8_t value = static_cast<uint8_t>(rh * 2); // compress 0–100% in 0.5 steps
     buffer[cursor++] = RELATIVE_HUMIDITY;
-    buffer[cursor++] = rh * 2;
-
-    return cursor;
+    buffer[cursor++] = value;
+    return true;
 }
 
-uint8_t UREncoder::addLuminosity(uint16_t lux) {
-    if ((cursor + LUMINOSITY_SIZE) > maxsize) {
-        return 0;
-    }
-    //write flag to buffer.
-    buffer[cursor++] = LUMINOSITY;
-    //Split the 16-bit unsigned int into 2 unsigned 8-bit int.
-    //Store the two bits in Big Endian order.
-    buffer[cursor++] = lux >> 8;
-    buffer[cursor++] = lux;
-
-    return cursor;
+bool UREncoder::addSoilMoisture(uint16_t value) {
+    if ((cursor + SOIL_MOISTURE_SIZE) > maxsize) return false;
+    buffer[cursor++] = SOIL_MOISTURE;
+    buffer[cursor++] = value >> 8;
+    buffer[cursor++] = value & 0xFF;
+    return true;
 }
